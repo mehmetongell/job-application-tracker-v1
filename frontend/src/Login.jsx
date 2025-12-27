@@ -9,6 +9,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
+    console.log("Incoming login data:", { email, password }); 
     e.preventDefault();
     try {
       const { data } = await API.post('/auth/login', { email, password });
