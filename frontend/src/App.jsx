@@ -64,16 +64,16 @@ function Register() {
           <div className="h-14 w-14 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg mb-4">
             <User className="text-white" size={28} />
           </div>
-          <h1 className="text-2xl font-black text-slate-900">Hesap Oluştur</h1>
+          <h1 className="text-2xl font-black text-slate-900">Create Account</h1>
         </div>
         <form onSubmit={handleRegister} className="space-y-4">
           <input required type="text" placeholder="Ad Soyad" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={name} onChange={(e) => setName(e.target.value)} />
           <input required type="email" placeholder="E-posta" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input required type="password" placeholder="Şifre" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition-all">Kayıt Ol</button>
+          <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg hover:bg-indigo-700 transition-all">Sign In</button>
         </form>
         <p className="text-center mt-6 text-slate-500 font-medium">
-          Zaten hesabın var mı? <Link to="/login" className="text-indigo-600 font-bold">Giriş Yap</Link>
+          Already have an account? <Link to="/login" className="text-indigo-600 font-bold">Sign In</Link>
         </p>
       </div>
     </div>
@@ -86,7 +86,7 @@ function ProfilePage() {
       <Sidebar activePage="profile" />
       <main className="flex-1 p-8">
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-3xl font-black text-slate-900 mb-8">Profil Ayarları</h1>
+          <h1 className="text-3xl font-black text-slate-900 mb-8">Profile Settings</h1>
           <div className="bg-white rounded-[32px] p-8 border border-slate-100 shadow-xl">
             <div className="flex items-center gap-6 mb-10">
               <div className="w-24 h-24 bg-indigo-600 rounded-3xl flex items-center justify-center text-white text-3xl font-bold">
@@ -100,11 +100,11 @@ function ProfilePage() {
             <div className="space-y-6">
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-indigo-600"><Mail size={18}/></div>
-                <div><p className="text-[10px] font-bold text-slate-400 uppercase">E-posta</p><p className="font-bold text-slate-700">mehmet@example.com</p></div>
+                <div><p className="text-[10px] font-bold text-slate-400 uppercase">E-mail</p><p className="font-bold text-slate-700">mehmet@test.com</p></div>
               </div>
               <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-emerald-600"><Shield size={18}/></div>
-                <div><p className="text-[10px] font-bold text-slate-400 uppercase">Durum</p><p className="font-bold text-slate-700">Doğrulanmış</p></div>
+                <div><p className="text-[10px] font-bold text-slate-400 uppercase">Status</p><p className="font-bold text-slate-700">Verified</p></div>
               </div>
             </div>
           </div>
@@ -132,7 +132,7 @@ function Sidebar({ activePage }) {
       </nav>
       <div className="p-4 mt-auto">
         <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all font-semibold">
-          <LogOut size={20} /><span>Çıkış Yap</span>
+          <LogOut size={20} /><span>Sign Out</span>
         </button>
       </div>
     </aside>
@@ -177,20 +177,20 @@ function Dashboard() {
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
             <div className="bg-white w-full max-w-md rounded-[32px] p-8 border border-white/20 shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-black text-slate-900">Yeni Başvuru</h2>
+                <h2 className="text-2xl font-black text-slate-900">New Application</h2>
                 <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400"><X size={24} /></button>
               </div>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <input required type="text" placeholder="Şirket" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} />
-                <input required type="text" placeholder="Pozisyon" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={formData.position} onChange={(e) => setFormData({...formData, position: e.target.value})} />
-                <input type="text" placeholder="Konum" className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} />
+                <input required type="text" placeholder="Company..." className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={formData.company} onChange={(e) => setFormData({...formData, company: e.target.value})} />
+                <input required type="text" placeholder="Position..." className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={formData.position} onChange={(e) => setFormData({...formData, position: e.target.value})} />
+                <input type="text" placeholder="Location..." className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none" value={formData.location} onChange={(e) => setFormData({...formData, location: e.target.value})} />
                 <select className="w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none font-bold text-slate-600" value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}>
                   <option value="APPLIED">Applied</option>
                   <option value="INTERVIEW">Interview</option>
                   <option value="OFFER">Offer</option>
                   <option value="REJECTED">Rejected</option>
                 </select>
-                <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-indigo-700 transition-all">Ekle</button>
+                <button type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-xl hover:bg-indigo-700 transition-all">Add</button>
               </form>
             </div>
           </div>
@@ -198,9 +198,9 @@ function Dashboard() {
         <header className="flex justify-between items-center mb-10">
           <div className="relative w-96">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <input type="text" placeholder="Arama yap..." className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none shadow-sm font-medium" value={search} onChange={(e) => { setSearch(e.target.value); fetchData(e.target.value); }} />
+            <input type="text" placeholder="Search..." className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none shadow-sm font-medium" value={search} onChange={(e) => { setSearch(e.target.value); fetchData(e.target.value); }} />
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl transition-all hover:-translate-y-0.5"><PlusCircle size={20} /><span>Yeni Başvuru</span></button>
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 bg-indigo-600 text-white px-6 py-3.5 rounded-2xl font-bold shadow-xl transition-all hover:-translate-y-0.5"><PlusCircle size={20} /><span>New Application</span></button>
         </header>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
           <StatCard label="Applied" value={stats.APPLIED} color="indigo" icon={Briefcase} />
@@ -210,12 +210,12 @@ function Dashboard() {
         </div>
         <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl overflow-hidden">
           <div className="p-8 border-b border-slate-50 flex justify-between items-center">
-            <h2 className="text-2xl font-black text-slate-800">Aktif Başvurular</h2>
-            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">{jobs.length} Kayıt</span>
+            <h2 className="text-2xl font-black text-slate-800">Active Applications</h2>
+            <span className="text-slate-400 text-xs font-bold uppercase tracking-widest">{jobs.length} Registration</span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
-              <thead><tr className="text-slate-400 text-[10px] uppercase font-black border-b border-slate-50"><th className="px-8 py-5">Şirket & Pozisyon</th><th className="px-8 py-5 text-center">Durum</th><th className="px-8 py-5">Konum</th><th className="px-8 py-5 text-right">Tarih</th></tr></thead>
+              <thead><tr className="text-slate-400 text-[10px] uppercase font-black border-b border-slate-50"><th className="px-8 py-5">Company & Position</th><th className="px-8 py-5 text-center">Status</th><th className="px-8 py-5">Location</th><th className="px-8 py-5 text-right">Date</th></tr></thead>
               <tbody className="divide-y divide-slate-50">
                 {jobs.map((job) => (
                   <tr key={job.id} className="group hover:bg-indigo-50/30 transition-all">

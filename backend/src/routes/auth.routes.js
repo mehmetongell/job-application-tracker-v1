@@ -10,15 +10,14 @@ router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
     
-    // Gelen veriyi loglayalım ki emin olalım
-    console.log("===> Kayıt isteği geldi:", { name, email });
+    console.log("===> Registration information has arrived:", { name, email });
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
-      return res.status(409).json({ message: "Bu e-posta zaten kullanımda." });
+      return res.status(409).json({ message: "This email is already in use." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -32,12 +31,12 @@ router.post("/register", async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Kayıt başarılı",
+      message: "Registration successful",
       user: { id: user.id, name: user.name, email: user.email }
     });
   } catch (error) {
     console.error("REGISTER ERROR:", error);
-    res.status(500).json({ message: "Kayıt sırasında sunucu hatası." });
+    res.status(500).json({ message: "Server error during registration." });
   }
 });
 
@@ -45,20 +44,20 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("===> Giriş denemesi yapılıyor:", email);
+    console.log("===> Attempting to log in:", email);
 
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Hatalı e-posta veya şifre." });
+      return res.status(401).json({ message: "Incorrect email or password." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Hatalı e-posta veya şifre." });
+      return res.status(401).json({ message: "Incorrect email or password." });
     }
 
     const token = jwt.sign(
@@ -68,13 +67,13 @@ router.post("/login", async (req, res) => {
     );
 
     res.json({
-      message: "Giriş başarılı",
+      message: "Login successful",
       token,
       user: { id: user.id, name: user.name, email: user.email },
     });
   } catch (error) {
     console.error("LOGIN ERROR:", error);
-    res.status(500).json({ message: "Giriş sırasında sunucu hatası." });
+    res.status(500).json({ message: "Server error during login." });
   }
 });
 
