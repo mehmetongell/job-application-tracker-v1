@@ -12,16 +12,17 @@ import {
 const router = Router(); 
 
 /* ================= REGISTER (Kayıt Ol) ================= */
-router.post("/register", validate(registerSchema), async (req, res) => {
+router.post("/register", async (req, res) => { 
   try {
     const { name, email, password } = req.body;
+    console.log("Kayıt denemesi:", email); // Log ekleyelim
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
     if (existingUser) {
-      return res.status(409).json({ message: "Email already in use" });
+      return res.status(409).json({ message: "Bu e-posta zaten kullanımda." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -35,13 +36,14 @@ router.post("/register", validate(registerSchema), async (req, res) => {
     });
 
     res.status(201).json({
+      message: "Kullanıcı başarıyla oluşturuldu",
       id: user.id,
       name: user.name,
       email: user.email,
     });
   } catch (error) {
     console.error("REGISTER ERROR:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Sunucu hatası oluştu." });
   }
 });
 
