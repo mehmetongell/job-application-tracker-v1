@@ -11,7 +11,7 @@ import {
 
 const router = Router(); 
 
-/* ================= REGISTER ================= */
+/* ================= REGISTER (Kayıt Ol) ================= */
 router.post("/register", validate(registerSchema), async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -45,23 +45,25 @@ router.post("/register", validate(registerSchema), async (req, res) => {
   }
 });
 
-/* ================= LOGIN ================= */
-router.post("/login", validate(loginSchema), async (req, res) => {
+/* ================= LOGIN (Giriş Yap) ================= */
+router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log("===> Login denemesi yapılıyor:", email);
 
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials (User not found)" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({ message: "Invalid credentials (Password mismatch)" });
     }
 
     const token = jwt.sign(
