@@ -1,11 +1,10 @@
 import express from "express";
-import cors from "cors";
+import cors from "cors"; 
 import authRoutes from "./routes/auth.routes.js";
 import jobRoutes from "./routes/job.routes.js";
 
 const app = express();
 
-const cors = require('cors');
 
 app.use(cors({
   origin: 'https://job-application-tracker-v1.vercel.app', 
