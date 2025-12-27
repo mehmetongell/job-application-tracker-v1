@@ -49,12 +49,14 @@ router.post("/register", validate(registerSchema), async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("1. İstek geldi:", email);
 
-    console.log("===> Login denemesi yapılıyor:", email);
-
+    // Veritabanı sorgusu başlamadan önce
+    console.log("2. Prisma sorgusu başlıyor...");
     const user = await prisma.user.findUnique({
       where: { email },
     });
+    console.log("3. Prisma sorgusu bitti, sonuç:", user ? "Kullanıcı bulundu" : "Kullanıcı yok");
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials (User not found)" });
