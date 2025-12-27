@@ -2,20 +2,16 @@ import { Router } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma/client.js";
-import validate from "../middlewares/validate.middleware.js";
-
-import {
-  registerSchema,
-  loginSchema,
-} from "../validations/auth.validation.js";
 
 const router = Router(); 
 
 /* ================= REGISTER (Kayıt Ol) ================= */
-router.post("/register", async (req, res) => { 
+router.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
-    console.log("Kayıt denemesi:", email); // Log ekleyelim
+    
+    // Gelen veriyi loglayalım ki emin olalım
+    console.log("===> Kayıt isteği geldi:", { name, email });
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -36,14 +32,12 @@ router.post("/register", async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Kullanıcı başarıyla oluşturuldu",
-      id: user.id,
-      name: user.name,
-      email: user.email,
+      message: "Kayıt başarılı",
+      user: { id: user.id, name: user.name, email: user.email }
     });
   } catch (error) {
     console.error("REGISTER ERROR:", error);
-    res.status(500).json({ message: "Sunucu hatası oluştu." });
+    res.status(500).json({ message: "Kayıt sırasında sunucu hatası." });
   }
 });
 
@@ -51,23 +45,20 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log("1. İstek geldi:", email);
+    console.log("===> Giriş denemesi yapılıyor:", email);
 
-    // Veritabanı sorgusu başlamadan önce
-    console.log("2. Prisma sorgusu başlıyor...");
     const user = await prisma.user.findUnique({
       where: { email },
     });
-    console.log("3. Prisma sorgusu bitti, sonuç:", user ? "Kullanıcı bulundu" : "Kullanıcı yok");
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials (User not found)" });
+      return res.status(401).json({ message: "Hatalı e-posta veya şifre." });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials (Password mismatch)" });
+      return res.status(401).json({ message: "Hatalı e-posta veya şifre." });
     }
 
     const token = jwt.sign(
@@ -77,17 +68,13 @@ router.post("/login", async (req, res) => {
     );
 
     res.json({
-      message: "Login successful",
+      message: "Giriş başarılı",
       token,
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-      },
+      user: { id: user.id, name: user.name, email: user.email },
     });
   } catch (error) {
     console.error("LOGIN ERROR:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({ message: "Giriş sırasında sunucu hatası." });
   }
 });
 
