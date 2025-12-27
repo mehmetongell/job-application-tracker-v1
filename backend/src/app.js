@@ -5,7 +5,13 @@ import jobRoutes from "./routes/job.routes.js";
 
 const app = express();
 
-app.use(cors());
+const cors = require('cors');
+
+app.use(cors({
+  origin: 'https://job-application-tracker-v1.vercel.app', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
 app.use(express.json());
 
