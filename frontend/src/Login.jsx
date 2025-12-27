@@ -12,8 +12,8 @@ export default function Login() {
     e.preventDefault();
     try {
       const { data } = await API.post('/auth/login', { email, password });
-      localStorage.setItem('token', data.token); // Token'ı kaydet
-      navigate('/'); // Dashboard'a yönlendir
+      localStorage.setItem('token', data.token); 
+      navigate('/'); 
     } catch (err) {
       alert("Login failed! Please check your credentials.");
     }

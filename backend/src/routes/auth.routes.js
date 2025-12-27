@@ -9,7 +9,7 @@ import {
   loginSchema,
 } from "../validations/auth.validation.js";
 
-const router = Router(); // ✅ HER ŞEYDEN ÖNCE
+const router = Router(); 
 
 /* ================= REGISTER ================= */
 router.post("/register", validate(registerSchema), async (req, res) => {

@@ -6,7 +6,6 @@ import {
 import API from './api';
 import Login from './Login';
 
-// --- NAVITEM BİLEŞENİ (Link ile güncellendi) ---
 const NavItem = ({ icon: Icon, label, active, to }) => (
   <Link to={to} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all font-semibold ${active ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'}`}>
     <Icon size={20} />
@@ -14,7 +13,6 @@ const NavItem = ({ icon: Icon, label, active, to }) => (
   </Link>
 );
 
-// --- YARDIMCI BİLEŞENLER ---
 const StatusBadge = ({ status }) => {
   const styles = {
     applied: "bg-blue-100 text-blue-700",
@@ -42,7 +40,6 @@ const StatCard = ({ label, value, color, icon: Icon }) => {
   );
 };
 
-// --- PROFİL SAYFASI BİLEŞENİ ---
 function ProfilePage() {
   const navigate = useNavigate();
   return (
@@ -83,7 +80,6 @@ function ProfilePage() {
   );
 }
 
-// --- SIDEBAR BİLEŞENİ ---
 function Sidebar({ activePage }) {
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -110,7 +106,6 @@ function Sidebar({ activePage }) {
   );
 }
 
-// --- DASHBOARD SAYFASI ---
 function Dashboard() {
   const [stats, setStats] = useState({ APPLIED: 0, INTERVIEW: 0, OFFER: 0, REJECTED: 0 });
   const [jobs, setJobs] = useState([]);
@@ -146,7 +141,7 @@ function Dashboard() {
       <Sidebar activePage="dashboard" />
       
       <main className="flex-1 p-8">
-        {/* MODAL KODLARI AYNI KALIYOR */}
+        
         {isModalOpen && (
           <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
             <div className="bg-white w-full max-w-md rounded-[32px] p-8 animate-in zoom-in duration-200 border border-white/20 shadow-2xl">
@@ -214,7 +209,6 @@ function Dashboard() {
   );
 }
 
-// --- ANA UYGULAMA VE ROTARLAR ---
 export default function App() {
   const PrivateRoute = ({ children }) => {
     return localStorage.getItem('token') ? children : <Navigate to="/login" />;
