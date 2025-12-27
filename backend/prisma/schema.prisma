@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String @unique
+  password String
+  jobs     JobApplication[]
+}
+
+model JobApplication {
+  id        String    @id @default(uuid())
+  company   String
+  position  String
+  location  String?   // 👈 Buraya soru işaretiyle (optional) ekledik
+  status    JobStatus @default(APPLIED)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+}
+
+
+enum JobStatus {
+  APPLIED
+  INTERVIEW
+  OFFER
+  REJECTED
+}
