@@ -5,8 +5,7 @@
 
 import axios from "axios";
 import dotenv from "dotenv";
-import pdf from "pdf-parse";
-import prisma from "../../config/client.js";
+import pdf from 'pdf-parse-fork';
 import AppError from "../../utils/AppError.js";
 
 dotenv.config();

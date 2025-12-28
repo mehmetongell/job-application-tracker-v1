@@ -1,7 +1,7 @@
 import * as jobService from "./job.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { sendEmail } from "../../utils/email.js";
-import { getInterviewPrepTemplate } from "../../utils/emailTemplates.js";
+import { sendEmail } from "../utils/email.js";
+import { getInterviewPrepTemplate } from "../utils/emailTemplates.js";
 import AppError from "../utils/AppError.js";
 
 
