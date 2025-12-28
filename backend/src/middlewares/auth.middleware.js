@@ -1,11 +1,10 @@
 import jwt from "jsonwebtoken";
-import AppError from "../utils/AppError.js";
 
 const authMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return next(new AppError("No token provided", 401));
+    return res.status(401).json({ message: "Unauthorized" });
   }
 
   const token = authHeader.split(" ")[1];
@@ -15,7 +14,7 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    return next(new AppError("Invalid token", 401));
+    return res.status(401).json({ message: "Invalid token" });
   }
 };
 

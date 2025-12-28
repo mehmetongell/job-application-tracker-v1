@@ -1,0 +1,67 @@
+/**
+ * @file ai.controller.js
+ * @description Controllers for AI-powered job compatibility analysis.
+ */
+
+import * as aiService from "./ai.service.js";
+import { asyncHandler } from "../../utils/asyncHandler.js";
+import AppError from "../../utils/AppError.js";
+
+/**
+ * @route   POST /api/ai/analyze
+ * @desc    Analyze compatibility using raw text for both job description and profile
+ * @access  Private
+ */
+export const getJobAnalysis = asyncHandler(async (req, res) => {
+  const { jobDescription, userProfile } = req.body;
+
+  if (!jobDescription || !userProfile) {
+    throw new AppError("Please provide both job description and user profile text.", 400);
+  }
+
+  const analysis = await aiService.analyzeJobCompatibility(jobDescription, userProfile);
+
+  res.status(200).json({
+    status: "success",
+    data: analysis
+  });
+});
+
+/**
+ * @route   POST /api/ai/analyze-resume
+ * @desc    Analyze compatibility by extracting text from an uploaded PDF resume
+ * @access  Private
+ */
+export const analyzeWithResumeFile = asyncHandler(async (req, res) => {
+  const { jobDescription, jobTitle } = req.body;
+
+  if (!jobDescription) throw new AppError("Please provide a job description.", 400);
+  if (!req.file) throw new AppError("Please upload a resume.", 400);
+
+  const resumeText = await aiService.extractTextFromPDF(req.file.buffer);
+
+  const analysis = await aiService.analyzeJobCompatibility(jobDescription, resumeText);
+
+  const savedRecord = await aiService.saveAnalysis(req.user.id, analysis, jobTitle);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      analysis,
+      recordId: savedRecord.id 
+    }
+  });
+});
+
+export const getMyAnalyses = asyncHandler(async (req, res) => {
+  const history = await prisma.analysis.findMany({
+    where: { userId: req.user.id },
+    orderBy: { createdAt: "desc" }
+  });
+
+  res.status(200).json({
+    status: "success",
+    results: history.length,
+    data: history
+  });
+});

@@ -8,28 +8,50 @@ datasource db {
 }
 
 model User {
-  id       String @id @default(uuid())
-  name     String
-  email    String @unique
-  password String
-  jobs     JobApplication[]
+  id           String     @id @default(uuid())
+  email        String     @unique
+  password     String
+  name         String?
+  // YENİ ALANLAR:
+  username     String?    @unique // URL'de görünecek isim (örn: mehmet-dev)
+  isPublic     Boolean    @default(false) // Profilini dışarı açmak istiyor mu?
+  bio          String?    @db.Text
+  
+  analyses     Analysis[]
+  jobApplications JobApplication[]
 }
 
 model JobApplication {
   id        String    @id @default(uuid())
   company   String
   position  String
-  location  String?   // 👈 Buraya soru işaretiyle (optional) ekledik
+  location  String?
+  notes     String?
   status    JobStatus @default(APPLIED)
   userId    String
   user      User      @relation(fields: [userId], references: [id])
   createdAt DateTime  @default(now())
+  isDeleted Boolean   @default(false)
+  updatedAt DateTime  @default(now()) @updatedAt
 }
-
 
 enum JobStatus {
   APPLIED
   INTERVIEW
   OFFER
   REJECTED
+}
+
+model Analysis {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade) // references: [id] kısmına köşeli parantez ekledim
+  jobTitle        String?
+  matchPercentage Int
+  summary         String   @db.Text
+  missingSkills   String[]
+  tips            String[]
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
 }
