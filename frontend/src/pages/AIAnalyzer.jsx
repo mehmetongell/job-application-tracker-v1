@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { BrainCircuit, FileText, Shield, TrendingUp, Sparkles } from 'lucide-react';
+import Sidebar from '../components/Sidebar';
+import API from '../services/api';
+import toast from 'react-hot-toast';
 
-const AIAnalyzer = () => {
+export default function AIAnalyzer() {
   const [file, setFile] = useState(null);
   const [jobDesc, setJobDesc] = useState('');
   const [loading, setLoading] = useState(false);
@@ -9,106 +12,108 @@ const AIAnalyzer = () => {
   const [questions, setQuestions] = useState([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
 
-  const handleUpload = async (e) => {
+  const handleAnalyze = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     const formData = new FormData();
     formData.append('resume', file);
     formData.append('jobDescription', jobDesc);
 
     try {
-      const { data } = await axios.post('/api/ai/analyze-resume', formData);
+      const { data } = await API.post('/ai/analyze-resume', formData);
       setResult(data.data.analysis);
-    } catch (err) {
-      alert("AI analysis failed. Please check your API quota.");
-    } finally {
-      setLoading(false);
-    }
+      toast.success("Analysis complete!");
+    } catch (err) { toast.error("Quota limit or file error."); }
+    finally { setLoading(false); }
+  };
+
+  const handleGetQuestions = async () => {
+    setLoadingQuestions(true);
+    try {
+      // Not: Resume text normalde backend'de PDF'den okunuyor, burada analiz sonucundan besleniyoruz
+      const { data } = await API.post('/ai/interview-prep', { jobDescription: jobDesc });
+      setQuestions(data.data);
+      toast.success("Interview prep ready!");
+    } catch (err) { toast.error("Could not generate questions."); }
+    finally { setLoadingQuestions(false); }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8">
-      <h2 className="text-2xl font-bold mb-6">AI Career Assistant</h2>
-      <form onSubmit={handleUpload} className="space-y-6 bg-white p-6 rounded-lg shadow">
-        <div>
-          <label className="block mb-2 font-medium">Job Description</label>
-          <textarea 
-            className="w-full p-3 border rounded-lg h-32"
-            placeholder="Paste the job description here..."
-            onChange={(e) => setJobDesc(e.target.value)}
-          />
-        </div>
-        
-        <div>
-          <label className="block mb-2 font-medium">Upload Resume (PDF)</label>
-          <input type="file" onChange={(e) => setFile(e.target.files[0])} className="w-full" />
-        </div>
+    <div className="flex min-h-screen bg-[#FDFDFF]">
+      <Sidebar activePage="ai" />
+      <main className="flex-1 p-10 max-w-6xl mx-auto">
+        <header className="mb-12 text-center">
+          <h1 className="text-4xl font-black text-slate-900 mb-3 italic tracking-tight">AI Compatibility Engine</h1>
+          <p className="text-slate-500 font-medium">Evaluate your profile against any job description in seconds.</p>
+        </header>
 
-        <button 
-          disabled={loading}
-          className="w-full bg-indigo-600 text-white py-3 rounded-lg font-bold hover:bg-indigo-700 disabled:bg-gray-400"
-        >
-          {loading ? "AI is thinking..." : "Start Analysis"}
-        </button>
-      </form>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          <form onSubmit={handleAnalyze} className="bg-white p-8 rounded-[40px] shadow-xl border border-slate-50 space-y-6 h-fit">
+            <div>
+              <label className="block text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">Requirements</label>
+              <textarea required className="w-full h-48 p-5 bg-slate-50 border border-slate-100 rounded-[24px] outline-none focus:ring-2 ring-indigo-100 transition-all text-sm font-medium" placeholder="Paste the job requirements here..." onChange={(e) => setJobDesc(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest">Resume (PDF)</label>
+              <div className="relative border-2 border-dashed border-slate-200 rounded-[24px] p-8 text-center hover:border-indigo-400 transition-all group">
+                <input type="file" required accept=".pdf" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onChange={(e) => setFile(e.target.files[0])} />
+                <FileText size={32} className="mx-auto text-slate-300 group-hover:text-indigo-500 mb-2 transition-colors" />
+                <span className="block text-sm font-bold text-slate-600">{file ? file.name : "Select your Resume PDF"}</span>
+              </div>
+            </div>
+            <button disabled={loading} className="w-full bg-indigo-600 text-white py-5 rounded-[24px] font-black shadow-xl hover:bg-indigo-700 disabled:bg-slate-300 transition-all flex items-center justify-center gap-3">
+              {loading ? <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><BrainCircuit size={20}/> Run AI Analysis</>}
+            </button>
+          </form>
 
-      {result && (
-        <div className="mt-10 p-6 bg-indigo-50 rounded-xl border border-indigo-200">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-xl font-bold">Analysis Result</h3>
-            <span className="text-3xl font-bold text-indigo-600">%{result.matchPercentage}</span>
-          </div>
-          <p className="text-gray-700 mb-4 italic">"{result.summary}"</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-white p-4 rounded shadow-sm">
-              <h4 className="font-bold text-red-500 mb-2">Missing Skills</h4>
-              <ul className="list-disc ml-4 text-sm">{result.missingKeywords.map(k => <li key={k}>{k}</li>)}</ul>
-            </div>
-            <div className="bg-white p-4 rounded shadow-sm">
-              <h4 className="font-bold text-green-500 mb-2">Improvement Tips</h4>
-              <ul className="list-disc ml-4 text-sm">{result.improvementTips.map(t => <li key={t}>{t}</li>)}</ul>
-            </div>
+          <div className="space-y-6">
+            {result ? (
+              <div className="bg-white p-8 rounded-[40px] shadow-2xl border-t-[12px] border-indigo-600 animate-in fade-in slide-in-from-bottom-4">
+                <div className="flex justify-between items-center mb-8">
+                  <span className="text-[10px] font-black bg-indigo-50 text-indigo-600 px-4 py-2 rounded-full uppercase tracking-widest italic">Match Result</span>
+                  <div className="text-6xl font-black text-indigo-600">%{result.matchPercentage}</div>
+                </div>
+                <p className="text-slate-600 font-bold italic mb-8 leading-relaxed text-lg">"{result.summary}"</p>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h4 className="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-3 flex items-center gap-2">⚠️ Missing Skills</h4>
+                    <div className="flex flex-wrap gap-2">{result.missingKeywords.map(k => <span key={k} className="bg-rose-50 text-rose-600 px-3 py-2 rounded-xl text-xs font-bold border border-rose-100">{k}</span>)}</div>
+                  </div>
+                  <div>
+                    <h4 className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-2">💡 Strategic Advice</h4>
+                    <ul className="space-y-3">{result.improvementTips.map(t => <li key={t} className="text-slate-500 text-sm font-bold flex gap-3"><TrendingUp size={16} className="text-emerald-500 shrink-0"/>{t}</li>)}</ul>
+                  </div>
+                </div>
+
+                <div className="mt-10 pt-8 border-t border-slate-50">
+                  <button onClick={handleGetQuestions} disabled={loadingQuestions} className="w-full py-4 bg-slate-900 text-white rounded-3xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-slate-800 transition-all">
+                    {loadingQuestions ? "Generating..." : <><Sparkles size={16}/> Get Personalized Interview Questions</>}
+                  </button>
+                  
+                  {questions.length > 0 && (
+                    <div className="mt-8 space-y-4 animate-in fade-in zoom-in-95">
+                      {questions.map((q, i) => (
+                        <div key={i} className="bg-slate-50 p-6 rounded-[32px] border border-slate-100">
+                          <p className="font-black text-slate-800 text-sm mb-2">Q{i+1}: {q.question}</p>
+                          <div className="bg-indigo-600/5 p-4 rounded-2xl text-[11px] text-indigo-700 font-bold border border-indigo-100/50">
+                             <strong>Tip:</strong> {q.hint}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="h-full min-h-[400px] flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-[40px] text-slate-300 space-y-4">
+                <BrainCircuit size={48} className="opacity-10" />
+                <p className="font-black uppercase tracking-[0.2em] text-sm italic">Analyze your first resume</p>
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </main>
     </div>
   );
-};
-
-const handleGetQuestions = async () => {
-  setLoadingQuestions(true);
-  try {
-    const { data } = await API.post('/ai/interview-prep', { jobDescription: jobDesc, resumeText: "PDF_TEXT_HERE" });
-    setQuestions(data.data);
-  } catch (err) {
-    alert("Could not fetch questions.");
-  } finally {
-    setLoadingQuestions(false);
-  }
-};
-
-{result && (
-  <div className="mt-8">
-    <button 
-      onClick={handleGetQuestions}
-      className="flex items-center gap-2 text-indigo-600 font-black uppercase text-xs hover:bg-indigo-50 p-3 rounded-xl transition-all"
-    >
-      <Shield size={16} /> Generate Personalized Interview Questions
-    </button>
-    
-    {questions.length > 0 && (
-      <div className="mt-6 space-y-4 animate-in slide-in-from-top-4 duration-500">
-        {questions.map((q, i) => (
-          <div key={i} className="bg-white border border-slate-100 p-6 rounded-3xl shadow-sm">
-            <h5 className="font-black text-slate-800 mb-2">Q{i+1}: {q.question}</h5>
-            <div className="bg-amber-50 p-4 rounded-2xl text-xs text-amber-800 font-medium">
-              <strong>💡 Pro Tip:</strong> {q.hint}
-            </div>
-          </div>
-        ))}
-      </div>
-    )}
-  </div>
-)}
+}

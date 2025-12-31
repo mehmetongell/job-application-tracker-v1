@@ -10,8 +10,8 @@ import {
 /**
  * @swagger
  * tags:
- *   name: Auth
- *   description: Authentication endpoints
+ * - name: Auth
+ * description: Authentication endpoints
  */
 
 const router = Router();

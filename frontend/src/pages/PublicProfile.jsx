@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { Shield, BrainCircuit, Globe, Activity } from 'lucide-react';
+import API from '../services/api';
 
-const PublicProfile = () => {
+export default function PublicProfile() {
   const { username } = useParams();
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
@@ -10,50 +11,46 @@ const PublicProfile = () => {
   useEffect(() => {
     const fetchPublicData = async () => {
       try {
-        const { data } = await axios.get(`/api/users/public/${username}`);
+        const { data } = await API.get(`/users/public/${username}`);
         setData(data.data);
-      } catch (err) {
-        setError(true);
-      }
+      } catch (err) { setError(true); }
     };
     fetchPublicData();
   }, [username]);
 
-  if (error) return <div className="text-center mt-20 font-bold text-red-500 text-2xl">Profile not found or private.</div>;
-  if (!data) return <div className="text-center mt-20">Loading Profile...</div>;
+  if (error) return <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50"><h1 className="text-4xl font-black text-slate-300 italic">404 - Profile is Private or Not Found</h1></div>;
+  if (!data) return <div className="min-h-screen flex items-center justify-center bg-slate-50"><Activity className="animate-spin text-indigo-600" /></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center mb-8 border-b-8 border-indigo-600">
-          <div className="w-24 h-24 bg-indigo-100 rounded-full mx-auto flex items-center justify-center text-3xl font-bold text-indigo-600 mb-4">
-            {data.name?.charAt(0) || 'U'}
+    <div className="min-h-screen bg-slate-50 py-12 px-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-[44px] shadow-2xl p-12 text-center mb-10 border-b-[12px] border-indigo-600 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-50 rounded-bl-full opacity-50"></div>
+          <div className="w-28 h-28 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-[36px] mx-auto flex items-center justify-center text-white text-4xl font-black mb-6 shadow-2xl shadow-indigo-100">
+            {data.name?.charAt(0)}
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">{data.name}</h1>
-          <p className="text-gray-500 mt-2">{data.bio || 'Career Explorer'}</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">{data.name}</h1>
+          <p className="text-indigo-600 font-black uppercase text-xs tracking-[0.3em] mt-3 italic">{data.bio || 'Career Explorer'}</p>
         </div>
 
-        {/* AI Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 text-xs font-bold uppercase tracking-wider">Avg. Match Score</h3>
-            <p className="text-4xl font-extrabold text-indigo-600">%{data.stats?.averageMatchScore || 0}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          <div className="bg-white p-8 rounded-[40px] shadow-xl border border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Avg. Match Score</p>
+            <h2 className="text-5xl font-black text-indigo-600">%{data.stats?.averageMatchScore || 0}</h2>
           </div>
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-gray-500 text-xs font-bold uppercase tracking-wider">Analyses Completed</h3>
-            <p className="text-4xl font-extrabold text-gray-800">{data.stats?.totalAnalyses || 0}</p>
+          <div className="bg-white p-8 rounded-[40px] shadow-xl border border-slate-100">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Success Index</p>
+            <h2 className="text-5xl font-black text-slate-800">{data.stats?.totalAnalyses || 0} <span className="text-sm">Jobs</span></h2>
           </div>
         </div>
 
-        <div className="mt-8 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h3 className="font-bold text-lg mb-4">Recent AI Vetting Activity</h3>
+        <div className="bg-white p-10 rounded-[44px] shadow-xl border border-slate-100">
+          <h3 className="font-black text-xl text-slate-800 mb-8 flex items-center gap-3"><Globe size={24} className="text-indigo-600"/> Verified Vetting History</h3>
           <div className="space-y-4">
-            {data.recentActivity.map((analysis, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                <span className="font-medium text-gray-700">{analysis.jobTitle}</span>
-                <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm font-bold">
-                  %{analysis.matchPercentage}
-                </span>
+            {data.recentActivity?.map((analysis, index) => (
+              <div key={index} className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 hover:scale-[1.02] transition-transform">
+                <span className="font-black text-slate-700 text-lg italic">{analysis.jobTitle}</span>
+                <span className="bg-white text-indigo-600 border border-indigo-100 px-5 py-2 rounded-2xl text-sm font-black shadow-sm">%{analysis.matchPercentage}</span>
               </div>
             ))}
           </div>
@@ -61,6 +58,4 @@ const PublicProfile = () => {
       </div>
     </div>
   );
-};
-
-export default PublicProfile;
+}

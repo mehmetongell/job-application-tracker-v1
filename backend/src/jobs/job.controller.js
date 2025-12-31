@@ -2,6 +2,11 @@ import * as jobService from "./job.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendEmail } from "../utils/email.js";
 import { getInterviewPrepTemplate } from "../utils/emailTemplates.js";
+import { scrapeJobLink } from '../modules/scraper/scraper.service.js';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import * as scraperService from "../modules/scraper/scraper.service.js";
+import * as aiService from "../modules/ai/ai.service.js";
+import prisma from "../prisma/client.js"; 
 import AppError from "../utils/AppError.js";
 
 
@@ -58,3 +63,46 @@ export const getStats = asyncHandler(async (req, res) => {
   });
 });
 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+export const autoFillFromLink = async (req, res) => {
+  try {
+    const { url } = req.body;
+    const userId = req.user.id; 
+
+    if (!url) {
+      return res.status(400).json({ error: "URL is required" });
+    }
+
+    const rawContent = await scraperService.scrapeJobLink(url);
+
+    const aiParsedData = await aiService.analyzeJobDescription(rawContent);
+
+    const newJobApplication = await prisma.jobApplication.create({
+      data: {
+        company: aiParsedData.company || "Unknown Company",
+        position: aiParsedData.position || "Unknown Position",
+        location: aiParsedData.location || "Not Specified",
+        notes: aiParsedData.notes || "",
+        status: "APPLIED", 
+        userId: userId
+      }
+    });
+
+    console.log(`[Job Controller] Job saved: ${newJobApplication.id}`);
+
+    return res.status(201).json({
+      success: true,
+      message: "Job details extracted and saved successfully",
+      data: newJobApplication
+    });
+
+  } catch (error) {
+    console.error("[Job Controller] Auto-fill Error:", error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: "Could not process job application",
+      details: error.message 
+    });
+  }
+};

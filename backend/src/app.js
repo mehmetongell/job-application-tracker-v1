@@ -1,14 +1,17 @@
+import './polyfill.js';
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import swaggerUi from "swagger-ui-express"; 
+
 import { swaggerSpec } from "./config/swagger.js"; 
 import aiRoutes from "./modules/ai/ai.routes.js";
 import authRoutes from "./modules/auth/auth.routes.js";
 import jobRoutes from "./jobs/job.routes.js";
 import { globalErrorHandler } from "./middlewares/error.middleware.js";
+
 
 const app = express();
 
