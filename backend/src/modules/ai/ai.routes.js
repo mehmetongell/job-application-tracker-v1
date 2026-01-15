@@ -7,7 +7,6 @@ const router = Router();
 
 router.use(authMiddleware);
 
-
 router.post("/analyze", aiController.getJobAnalysis);
 
 router.post(

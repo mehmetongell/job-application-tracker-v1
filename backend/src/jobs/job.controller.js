@@ -49,6 +49,29 @@ export const updateJob = asyncHandler(async (req, res) => {
   res.status(200).json({ status: "success", data: updatedJob });
 });
 
+export const updateJobStatus = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body; 
+
+  const validStatuses = ["APPLIED", "INTERVIEW", "OFFER", "REJECTED"];
+  if (!validStatuses.includes(status)) {
+    throw new AppError("Invalid status value.", 400);
+  }
+
+  const updatedJob = await prisma.jobApplication.update({
+    where: { 
+      id: id,
+      userId: req.user.id 
+    },
+    data: { status }
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: updatedJob
+  });
+});
+
 export const deleteJob = asyncHandler(async (req, res) => {
   await jobService.deleteJob(req.params.id, req.user.id);
   res.status(204).json({ status: "success", data: null });

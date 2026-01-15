@@ -4,8 +4,8 @@ import {
   LayoutDashboard, Briefcase, User, LogOut, PlusCircle, Search, MapPin, X, 
   Calendar, Shield, BrainCircuit, FileText, TrendingUp, Globe, Activity
 } from 'lucide-react';
-import API from './api';
-import Login from './Login';
+import API from './services/api';
+import Login from './pages/Login';
 
 // --- SHARED COMPONENTS ---
 

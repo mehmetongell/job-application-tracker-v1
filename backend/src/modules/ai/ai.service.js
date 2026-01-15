@@ -1,8 +1,3 @@
-/**
- * @file ai.service.js
- * @description Service for handling Google Gemini AI integrations for job analysis and auto-fill.
- */
-
 import axios from "axios";
 import dotenv from "dotenv";
 import pdf from 'pdf-parse-fork';
@@ -13,10 +8,15 @@ dotenv.config();
 const prisma = new PrismaClient();
 const MODEL_NAME = "gemini-2.0-flash-exp";
 
-/**
- * NEW: Analyzes raw scraped text to extract structured job application data.
- * Matches the JobApplication model in schema.prisma.
- */
+export const extractTextFromPDF = async (buffer) => {
+  try {
+    const data = await pdf(buffer);
+    return data.text;
+  } catch (error) {
+    throw new Error("Could not read the PDF file. Ensure it is a valid PDF.");
+  }
+};
+
 export const analyzeJobDescription = async (rawText) => {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -48,19 +48,15 @@ export const analyzeJobDescription = async (rawText) => {
     const cleanJson = aiText.replace(/```json|```/g, "").trim();
     return JSON.parse(cleanJson);
   } catch (error) {
-    console.error("[AI Service] Auto-fill Extraction Error:", error.message);
-    return { 
-      company: "Unknown", 
-      position: "Unknown", 
-      location: "Not Specified", 
-      notes: "Auto-fill failed to parse details." 
+    return {
+      company: "Unknown",
+      position: "Unknown",
+      location: "Not Specified",
+      notes: "Auto-fill failed to parse details."
     };
   }
 };
 
-/**
- * Analyzes the compatibility between a job description and a user profile.
- */
 export const analyzeJobCompatibility = async (jobDescription, userProfile) => {
   try {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -69,16 +65,16 @@ export const analyzeJobCompatibility = async (jobDescription, userProfile) => {
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
 
     const prompt = `
-      Analyze this Job vs Resume. 
+      Analyze this Job vs Resume/Document. 
       Job: ${jobDescription}
-      Resume: ${userProfile}
+      Document Content: ${userProfile}
       
       Return JSON:
       {
         "matchPercentage": number,
         "missingKeywords": ["skill1", "skill2"],
         "improvementTips": ["tip1", "tip2", "tip3"],
-        "summary": "2-sentence outlook"
+        "summary": "2-sentence outlook on why this matches or does not match."
       }
     `;
 
@@ -89,8 +85,19 @@ export const analyzeJobCompatibility = async (jobDescription, userProfile) => {
     const aiText = response.data.candidates[0].content.parts[0].text;
     return JSON.parse(aiText.replace(/```json|```/g, "").trim());
   } catch (error) {
-    console.error("[AI Service] Compatibility Analysis Error:", error.message);
     throw new AppError("AI Analysis failed.", 500);
   }
 };
 
+export const saveAnalysis = async (userId, analysisData, jobTitle) => {
+  return await prisma.analysis.create({
+    data: {
+      userId,
+      jobTitle,
+      matchPercentage: analysisData.matchPercentage,
+      summary: analysisData.summary,
+      missingSkills: analysisData.missingKeywords || [],
+      tips: analysisData.improvementTips || []
+    }
+  });
+};

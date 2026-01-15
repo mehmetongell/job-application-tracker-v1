@@ -1,16 +1,13 @@
-/**
- * @file ai.controller.js
- * @description Controllers for AI-powered job compatibility analysis.
- */
-
 import * as aiService from "./ai.service.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import AppError from "../../utils/AppError.js";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 /**
  * @route   POST /api/ai/analyze
  * @desc    Analyze compatibility using raw text for both job description and profile
- * @access  Private
  */
 export const getJobAnalysis = asyncHandler(async (req, res) => {
   const { jobDescription, userProfile } = req.body;
@@ -30,7 +27,6 @@ export const getJobAnalysis = asyncHandler(async (req, res) => {
 /**
  * @route   POST /api/ai/analyze-resume
  * @desc    Analyze compatibility by extracting text from an uploaded PDF resume
- * @access  Private
  */
 export const analyzeWithResumeFile = asyncHandler(async (req, res) => {
   const { jobDescription, jobTitle } = req.body;
@@ -42,7 +38,7 @@ export const analyzeWithResumeFile = asyncHandler(async (req, res) => {
 
   const analysis = await aiService.analyzeJobCompatibility(jobDescription, resumeText);
 
-  const savedRecord = await aiService.saveAnalysis(req.user.id, analysis, jobTitle);
+  const savedRecord = await aiService.saveAnalysis(req.user.id, analysis, jobTitle || "Unknown Position");
 
   res.status(200).json({
     status: "success",
@@ -53,6 +49,10 @@ export const analyzeWithResumeFile = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @route   GET /api/ai/history
+ * @desc    Get current user's analysis history
+ */
 export const getMyAnalyses = asyncHandler(async (req, res) => {
   const history = await prisma.analysis.findMany({
     where: { userId: req.user.id },
