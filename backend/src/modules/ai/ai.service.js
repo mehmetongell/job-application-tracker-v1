@@ -101,3 +101,45 @@ export const saveAnalysis = async (userId, analysisData, jobTitle) => {
     }
   });
 };
+
+
+export const generateInterviewQuestions = async (company, position) => {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+    const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+    const prompt = `
+      Create an interview preparation guide for a "${position}" role at "${company}".
+      
+      Return ONLY a JSON object with this structure:
+      {
+        "technicalQuestions": [
+          {"question": "string", "hint": "brief hint about the answer"}
+        ],
+        "behavioralQuestions": [
+           {"question": "string", "hint": "what interviewers look for"}
+        ],
+        "curveballQuestion": "one very difficult/trick question",
+        "companyCultureTip": "1 sentence tip about this specific company's culture"
+      }
+      Important: Return ONLY JSON. No markdown.
+    `;
+
+    const response = await axios.post(API_URL, {
+      contents: [{ parts: [{ text: prompt }] }]
+    });
+
+    const aiText = response.data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const cleanJson = aiText.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanJson);
+
+  } catch (error) {
+    console.error("[AI Service] Interview Prep Error:", error.message);
+    return {
+      technicalQuestions: [{ question: "Describe a challenging project.", hint: "Focus on problem solving." }],
+      behavioralQuestions: [{ question: "Why do you want to work here?", hint: "Show passion." }],
+      curveballQuestion: "How many golf balls fit in a bus?",
+      companyCultureTip: "Research their values."
+    };
+  }
+};

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { MapPin, Calendar, MoreHorizontal } from 'lucide-react';
+import { MapPin, MoreHorizontal, ArrowUpRight } from 'lucide-react'; 
 import API from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -11,7 +11,7 @@ const STATUS_CONFIG = {
   REJECTED: { title: 'Rejected', color: 'bg-rose-50 text-rose-700 border-rose-200', dot: 'bg-rose-500' }
 };
 
-export default function BoardView({ jobs, onStatusChange }) {
+export default function BoardView({ jobs, onStatusChange, onJobClick }) {
   const [columns, setColumns] = useState({
     APPLIED: [], INTERVIEW: [], OFFER: [], REJECTED: []
   });
@@ -19,7 +19,9 @@ export default function BoardView({ jobs, onStatusChange }) {
   useEffect(() => {
     const newCols = { APPLIED: [], INTERVIEW: [], OFFER: [], REJECTED: [] };
     jobs.forEach(job => {
-      if (newCols[job.status]) newCols[job.status].push(job);
+      if (newCols[job.status]) {
+        newCols[job.status].push(job);
+      }
     });
     setColumns(newCols);
   }, [jobs]);
@@ -46,7 +48,7 @@ export default function BoardView({ jobs, onStatusChange }) {
     try {
       await API.patch(`/jobs/${draggableId}/status`, { status: destination.droppableId });
       toast.success(`Moved to ${STATUS_CONFIG[destination.droppableId].title}`);
-      if (onStatusChange) onStatusChange(); 
+      if (onStatusChange) onStatusChange();
     } catch (error) {
       toast.error("Failed to update status");
     }
@@ -84,20 +86,20 @@ export default function BoardView({ jobs, onStatusChange }) {
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
-                            className={`bg-white p-5 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-md hover:border-indigo-100 transition-all ${
+                            className={`bg-white p-5 rounded-2xl shadow-sm border border-slate-100 group hover:shadow-md hover:border-indigo-100 transition-all relative flex flex-col gap-3 ${
                               snapshot.isDragging ? 'shadow-2xl rotate-2 scale-105 ring-2 ring-indigo-500 z-50' : ''
                             }`}
                           >
-                            <div className="flex justify-between items-start mb-3">
+                            <div className="flex justify-between items-start">
                               <h4 className="font-black text-slate-800 text-sm leading-tight">{job.company}</h4>
-                              <button className="text-slate-300 hover:text-indigo-600">
+                              <button className="text-slate-300 hover:text-indigo-600 transition-colors">
                                 <MoreHorizontal size={16} />
                               </button>
                             </div>
                             
-                            <p className="text-xs font-bold text-slate-400 mb-4">{job.position}</p>
+                            <p className="text-xs font-bold text-slate-400">{job.position}</p>
                             
-                            <div className="flex items-center justify-between pt-3 border-t border-slate-50">
+                            <div className="flex items-center justify-between pt-3 border-t border-slate-50 mt-auto">
                               <div className="flex items-center gap-1.5 text-slate-400 text-[10px] font-bold">
                                 <MapPin size={12} />
                                 {job.location || 'Remote'}
@@ -106,6 +108,17 @@ export default function BoardView({ jobs, onStatusChange }) {
                                 {new Date(job.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                               </div>
                             </div>
+
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation(); 
+                                if (onJobClick) onJobClick(job);
+                              }}
+                              className="w-full py-2.5 bg-indigo-100 text-indigo-700 rounded-xl text-xs font-bold flex items-center justify-center gap-2 hover:bg-indigo-600 hover:text-white transition-colors mt-1"
+                            >
+                              Open AI Coach <ArrowUpRight size={14} />
+                            </button>
+
                           </div>
                         )}
                       </Draggable>

@@ -65,3 +65,22 @@ export const getMyAnalyses = asyncHandler(async (req, res) => {
     data: history
   });
 });
+
+/**
+ * @route   POST /api/ai/interview-prep
+ * @desc    Generate interview questions based on company and position
+ */
+export const getInterviewQuestions = asyncHandler(async (req, res) => {
+  const { company, position } = req.body;
+
+  if (!company || !position) {
+    throw new AppError("Company and Position are required.", 400);
+  }
+
+  const questions = await aiService.generateInterviewQuestions(company, position);
+
+  res.status(200).json({
+    status: "success",
+    data: questions
+  });
+});

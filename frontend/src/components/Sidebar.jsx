@@ -1,6 +1,13 @@
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, User, LogOut, BrainCircuit, Activity } from 'lucide-react';
-import { NavItem } from './Shared';
+
+const NavItem = ({ icon: Icon, label, active, to }) => (
+  <Link to={to} className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all font-bold ${active ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-500 hover:bg-slate-50'}`}>
+    <Icon size={20} />
+    <span className="text-sm">{label}</span>
+  </Link>
+);
 
 export default function Sidebar({ activePage }) {
   const navigate = useNavigate();

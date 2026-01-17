@@ -15,7 +15,7 @@ export default function Dashboard() {
   const [jobs, setJobs] = useState([]);
   const [search, setSearch] = useState('');
   
-  const [viewMode, setViewMode] = useState('table');
+  const [viewMode, setViewMode] = useState('table'); 
   
   const [isModalOpen, setIsModalOpen] = useState(false); 
   const [selectedJob, setSelectedJob] = useState(null);  
@@ -67,12 +67,12 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
+    <div className="flex min-h-screen bg-[#F8FAFC] overflow-hidden">
       <Sidebar activePage="dashboard" />
       
-      <main className="flex-1 p-10 overflow-hidden"> 
+      <main className="flex-1 p-10 h-screen overflow-y-auto overflow-x-hidden relative">
         
-        <header className="flex justify-between items-center mb-10">
+        <header className="flex justify-between items-center mb-10 relative z-10">
           <div>
             <h1 className="text-3xl font-black text-slate-900 tracking-tight italic">JobPulse</h1>
             <p className="text-slate-400 font-black mt-2 text-xs uppercase tracking-[0.2em]">Application Intelligence</p>
@@ -88,7 +88,7 @@ export default function Dashboard() {
               />
             </div>
 
-            <div className="bg-white p-1.5 rounded-2xl border border-slate-100 flex items-center gap-1 shadow-sm">
+            <div className="bg-white p-1.5 rounded-2xl border-2 border-red-500 flex items-center gap-1 shadow-sm animate-pulse">
               <button 
                 onClick={() => setViewMode('table')}
                 className={`p-2 rounded-xl transition-all duration-200 ${viewMode === 'table' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
@@ -99,7 +99,7 @@ export default function Dashboard() {
               <button 
                 onClick={() => setViewMode('board')}
                 className={`p-2 rounded-xl transition-all duration-200 ${viewMode === 'board' ? 'bg-indigo-50 text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
-                title="Kanban Board View"
+                title="Board View"
               >
                 <KanbanSquare size={20} />
               </button>
@@ -111,9 +111,11 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <StatsGrid stats={stats} />
+        <div className="relative z-0">
+          <StatsGrid stats={stats} />
+        </div>
         
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 relative z-0 mt-8">
           {viewMode === 'table' ? (
             <JobTable 
               jobs={jobs} 
@@ -123,6 +125,7 @@ export default function Dashboard() {
             <BoardView 
               jobs={jobs} 
               onStatusChange={() => fetchData(search)} 
+              onJobClick={(job) => setSelectedJob(job)} 
             />
           )}
         </div>

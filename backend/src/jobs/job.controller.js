@@ -9,7 +9,6 @@ import * as aiService from "../modules/ai/ai.service.js";
 import prisma from "../prisma/client.js"; 
 import AppError from "../utils/AppError.js";
 
-
 export const getAllJobs = asyncHandler(async (req, res) => {
   const jobs = await jobService.getJobs(req.user.id, req.query);
   res.status(200).json({ status: "success", results: jobs.length, data: jobs });
@@ -39,11 +38,15 @@ export const updateJob = asyncHandler(async (req, res) => {
       lastAnalysis?.tips || ["Prepare for common interview questions."]
     );
 
-    await sendEmail({
-      email: req.user.email,
-      subject: `Interview Invitation: ${updatedJob.company} Preparation Guide`,
-      html: emailHtml
-    });
+    try {
+      await sendEmail({
+        email: req.user.email,
+        subject: `Interview Invitation: ${updatedJob.company} Preparation Guide`,
+        html: emailHtml
+      });
+    } catch (error) {
+      console.error("Email sending failed:", error);
+    }
   }
 
   res.status(200).json({ status: "success", data: updatedJob });
@@ -78,11 +81,44 @@ export const deleteJob = asyncHandler(async (req, res) => {
 });
 
 export const getStats = asyncHandler(async (req, res) => {
-  const stats = await jobService.getDashboardStats(req.user.id);
+  const userId = req.user.id;
+
+  const groupStats = await prisma.jobApplication.groupBy({
+    by: ['status'],
+    where: { userId: userId },
+    _count: {
+      _all: true,
+    },
+  });
+
+  const defaultStats = {
+    APPLIED: 0,
+    INTERVIEW: 0,
+    OFFER: 0,
+    REJECTED: 0
+  };
+
+  groupStats.forEach((item) => {
+    if (defaultStats[item.status] !== undefined) {
+      defaultStats[item.status] = item._count._all;
+    }
+  });
+
+  const aiStats = await prisma.analysis.aggregate({
+    where: { userId: userId },
+    _avg: {
+      matchPercentage: true
+    }
+  });
+
+  const averageMatch = Math.round(aiStats._avg.matchPercentage || 0);
 
   res.status(200).json({
     status: "success",
-    data: stats
+    data: defaultStats, 
+    ai: {               
+      averageMatch: averageMatch
+    }
   });
 });
 
@@ -98,7 +134,6 @@ export const autoFillFromLink = async (req, res) => {
     }
 
     const rawContent = await scraperService.scrapeJobLink(url);
-
     const aiParsedData = await aiService.analyzeJobDescription(rawContent);
 
     const newJobApplication = await prisma.jobApplication.create({

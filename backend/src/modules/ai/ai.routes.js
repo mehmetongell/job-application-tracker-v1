@@ -9,6 +9,8 @@ router.use(authMiddleware);
 
 router.post("/analyze", aiController.getJobAnalysis);
 
+router.post("/interview-prep", aiController.getInterviewQuestions);
+
 router.post(
   "/analyze-resume", 
   upload.single("resume"), 
