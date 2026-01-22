@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import API from './services/api';
 import Login from './pages/Login';
-
+import ProfilePage from './pages/ProfilePage';
 import Dashboard from './pages/Dashboard';
 import Sidebar from './components/Sidebar';
 
@@ -87,29 +87,6 @@ function AIAnalyzer() {
                 </div>
               </div>
             ) : <div className="h-full border-2 border-dashed border-slate-100 rounded-[40px] flex items-center justify-center text-slate-300 font-bold">Waiting for input...</div>}
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-}
-
-function ProfilePage() {
-  return (
-    <div className="flex min-h-screen bg-[#F8FAFC]">
-      <Sidebar activePage="profile" />
-      <main className="flex-1 p-10">
-        <div className="max-w-4xl mx-auto bg-white rounded-[40px] p-12 shadow-xl border border-slate-100">
-          <div className="flex items-center gap-8 mb-10">
-            <div className="w-24 h-24 bg-indigo-600 rounded-[30px] flex items-center justify-center text-white shadow-xl"><User size={40}/></div>
-            <div>
-              <h1 className="text-3xl font-black text-slate-900">Mehmet Öngel</h1>
-              <p className="text-indigo-600 font-bold uppercase text-xs tracking-widest mt-1 italic">Verified Professional</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-6">
-            <div className="p-6 bg-slate-50 rounded-3xl"><p className="text-[10px] font-black text-slate-400 uppercase mb-1">Email</p><p className="font-bold">mehmet@test.com</p></div>
-            <div className="p-6 bg-slate-50 rounded-3xl"><p className="text-[10px] font-black text-slate-400 uppercase mb-1">Status</p><p className="font-bold text-emerald-600 flex items-center gap-2"><Shield size={16}/> Pro Plan</p></div>
           </div>
         </div>
       </main>

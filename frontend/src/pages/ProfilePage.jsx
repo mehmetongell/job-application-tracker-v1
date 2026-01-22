@@ -1,85 +1,142 @@
 import React, { useState, useEffect } from 'react';
-import { User, Shield, Globe, TrendingUp } from 'lucide-react';
+import { User, Shield, Mail, Briefcase, Save, Loader2 } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import API from '../services/api';
 import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState({ name: '', username: '', bio: '', isPublic: false });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [user, setUser] = useState({
+    name: '',
+    email: '',
+    title: '',
+    bio: ''
+  });
 
   useEffect(() => {
-    const fetchMe = async () => {
+    const fetchProfile = async () => {
       try {
-        const { data } = await API.get('/users/me');
-        setProfile(data.data);
-      } catch (err) { toast.error("Could not load profile."); }
-      finally { setLoading(false); }
+        const { data } = await API.get('/auth/me');
+        setUser(data.data);
+      } catch (error) {
+        toast.error("Failed to load profile");
+      } finally {
+        setLoading(false);
+      }
     };
-    fetchMe();
+    fetchProfile();
   }, []);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      await API.patch('/users/updateMe', profile);
-      toast.success('Profile updated successfully! ✨');
-    } catch (err) { toast.error('Error: Username might be taken.'); }
+      const { data } = await API.patch('/auth/me', {
+        name: user.name,
+        title: user.title,
+        bio: user.bio
+      });
+      setUser(data.data); 
+      toast.success("Profile updated successfully!");
+    } catch (error) {
+      toast.error("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) return <div className="flex h-screen items-center justify-center bg-[#F8FAFC]"><Loader2 className="animate-spin text-indigo-600" /></div>;
 
   return (
     <div className="flex min-h-screen bg-[#F8FAFC]">
       <Sidebar activePage="profile" />
-      <main className="flex-1 p-10 max-w-5xl mx-auto">
-        <h1 className="text-3xl font-black text-slate-900 mb-10 italic">Account & Branding</h1>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <form onSubmit={handleUpdate} className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-[40px] p-10 shadow-xl border border-slate-100">
-               <div className="grid grid-cols-1 gap-6">
-                <div>
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Full Name</label>
-                  <input type="text" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold" value={profile.name} onChange={(e) => setProfile({...profile, name: e.target.value})} />
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Public Alias (slug)</label>
-                  <div className="flex items-center gap-2 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <span className="text-slate-400 text-xs font-bold">jobpulse.com/public/</span>
-                    <input type="text" className="bg-transparent border-none outline-none font-bold w-full" value={profile.username} onChange={(e) => setProfile({...profile, username: e.target.value})} />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-black uppercase text-slate-400 mb-2 tracking-widest">Bio / Headline</label>
-                  <textarea className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold h-32" value={profile.bio} onChange={(e) => setProfile({...profile, bio: e.target.value})} />
-                </div>
-               </div>
-            </div>
-
-            <div className="bg-white rounded-[40px] p-8 shadow-xl border border-slate-100 flex items-center justify-between">
-              <div>
-                <h4 className="font-black text-slate-800 mb-1 flex items-center gap-2"><Globe size={18}/> Visibility</h4>
-                <p className="text-xs text-slate-400 font-bold">Toggle public profile for recruiters.</p>
+      
+      <main className="flex-1 p-10">
+        <div className="max-w-4xl mx-auto">
+          
+          <div className="bg-white rounded-[40px] p-12 shadow-xl border border-slate-100 mb-8 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            
+            <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
+              <div className="w-32 h-32 bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[32px] flex items-center justify-center text-white shadow-2xl shadow-indigo-200">
+                <span className="text-4xl font-black">{user.name?.charAt(0).toUpperCase()}</span>
               </div>
-              <button type="button" onClick={() => setProfile({...profile, isPublic: !profile.isPublic})} className={`w-14 h-8 rounded-full transition-all relative ${profile.isPublic ? 'bg-indigo-600' : 'bg-slate-200'}`}>
-                <div className={`absolute top-1 bg-white w-6 h-6 rounded-full transition-all ${profile.isPublic ? 'left-7' : 'left-1'}`} />
+              <div className="text-center md:text-left">
+                <h1 className="text-4xl font-black text-slate-900 tracking-tight">{user.name}</h1>
+                <p className="text-indigo-600 font-bold uppercase text-xs tracking-widest mt-2 flex items-center justify-center md:justify-start gap-2">
+                  <Shield size={14} /> Verified Professional
+                </p>
+                <p className="text-slate-400 font-medium mt-4 max-w-lg">{user.bio || "No bio yet. Tell us about yourself!"}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-[40px] shadow-xl border border-slate-100 p-10">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-black text-slate-900 italic">Personal Details</h2>
+              <button 
+                onClick={handleUpdate} 
+                disabled={saving}
+                className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-black text-sm flex items-center gap-2 hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+              >
+                {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                Save Changes
               </button>
             </div>
 
-            <button className="w-full bg-indigo-600 text-white py-5 rounded-[24px] font-black shadow-xl shadow-indigo-100 hover:scale-[1.02] active:scale-95 transition-all">Save Changes</button>
-          </form>
+            <form className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="space-y-3">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 focus-within:ring-2 ring-indigo-100 transition-all">
+                  <User size={20} className="text-slate-400" />
+                  <input 
+                    value={user.name} 
+                    onChange={(e) => setUser({...user, name: e.target.value})}
+                    className="bg-transparent outline-none w-full font-bold text-slate-700" 
+                    placeholder="John Doe"
+                  />
+                </div>
+              </div>
 
-          <div className="space-y-6">
-             <div className="bg-indigo-900 rounded-[40px] p-8 text-white shadow-2xl">
-               <TrendingUp size={40} className="mb-6 text-indigo-400" />
-               <h3 className="text-2xl font-black leading-tight mb-4">Elevate Your Presence</h3>
-               <p className="text-indigo-200 text-sm font-medium">Public profiles with scores above 80% receive 4x more clicks from recruiters.</p>
-             </div>
-             <div className="bg-white rounded-[40px] p-8 shadow-xl border border-slate-100 text-center">
-                <Shield className="mx-auto text-emerald-500 mb-3" size={32}/>
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">Account Type</p>
-                <p className="text-lg font-black text-slate-800">Professional</p>
-             </div>
+              <div className="space-y-3">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Job Title</label>
+                <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-100 focus-within:ring-2 ring-indigo-100 transition-all">
+                  <Briefcase size={20} className="text-slate-400" />
+                  <input 
+                    value={user.title || ''} 
+                    onChange={(e) => setUser({...user, title: e.target.value})}
+                    className="bg-transparent outline-none w-full font-bold text-slate-700" 
+                    placeholder="e.g. Senior Frontend Developer"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+                <div className="flex items-center gap-3 bg-slate-100 p-4 rounded-2xl border border-slate-200 opacity-70 cursor-not-allowed">
+                  <Mail size={20} className="text-slate-400" />
+                  <input 
+                    value={user.email} 
+                    disabled 
+                    className="bg-transparent outline-none w-full font-bold text-slate-500 cursor-not-allowed" 
+                  />
+                  <span className="text-[10px] font-black bg-slate-200 text-slate-500 px-2 py-1 rounded">LOCKED</span>
+                </div>
+              </div>
+
+              <div className="space-y-3 md:col-span-2">
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">About Me</label>
+                <textarea 
+                  value={user.bio || ''} 
+                  onChange={(e) => setUser({...user, bio: e.target.value})}
+                  className="w-full bg-slate-50 p-5 rounded-2xl border border-slate-100 focus:ring-2 ring-indigo-100 outline-none font-medium text-slate-600 h-32 resize-none"
+                  placeholder="Write a short bio about your career goals..."
+                />
+              </div>
+            </form>
           </div>
+
         </div>
       </main>
     </div>

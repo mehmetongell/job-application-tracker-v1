@@ -12,11 +12,10 @@ model User {
   email        String     @unique
   password     String
   name         String?
-  // YENİ ALANLAR:
-  username     String?    @unique // URL'de görünecek isim (örn: mehmet-dev)
-  isPublic     Boolean    @default(false) // Profilini dışarı açmak istiyor mu?
+  username     String?    @unique 
+  isPublic     Boolean    @default(false) 
+  title        String?  @default("Job Seeker") 
   bio          String?    @db.Text
-  
   analyses     Analysis[]
   jobApplications JobApplication[]
 }

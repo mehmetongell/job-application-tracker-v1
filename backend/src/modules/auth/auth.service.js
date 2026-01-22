@@ -8,6 +8,7 @@ const generateToken = (id) => {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d" 
   });
 };
+
 export const registerUser = async ({ name, email, password }) => {
   const existingUser = await prisma.user.findUnique({ where: { email } });
   if (existingUser) throw new AppError("Email already in use", 400);
@@ -28,5 +29,14 @@ export const loginUser = async ({ email, password }) => {
   }
 
   const token = generateToken(user.id);
-  return { token, user: { id: user.id, name: user.name, email: user.email } };
+  return { 
+    token, 
+    user: { 
+      id: user.id, 
+      name: user.name, 
+      email: user.email,
+      title: user.title,
+      bio: user.bio
+    } 
+  };
 };
